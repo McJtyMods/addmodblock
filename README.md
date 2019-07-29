@@ -3,6 +3,8 @@ This simple python script helps with adding source code and json for minecraft b
 
 Before using this script you will have to configure it. Edit the script and modify the first part of the script to suit your needs.
 
+This script supports generating both java and json for: block, tile entity, gui, container, blockstate json, model json, item json, recipe json and loot table json.
+
 To use this run this script from within your mod root folder. If you then want to add a block without tile entity and gui you can do this:
 
 # python addblock.py MyFancyBlock
