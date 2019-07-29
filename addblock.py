@@ -512,7 +512,7 @@ def add_block(name, force, gui, tile, nojson):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Make a block')
-    parser.add_argument('name', help='Camelcase name of the block to add')
+    parser.add_argument('name', help='CamelCase name of the block to add')
     parser.add_argument('--force', help='Overwrite files even if they exist (be careful!)', action='store_true')
     parser.add_argument('--tile', help='Generate additional code for a tileentity', action='store_true')
     parser.add_argument('--gui', help='Generate additional code for container and gui (implies tile!)',
