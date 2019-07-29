@@ -424,7 +424,7 @@ def generate(template, inputs, conditionals):
         template = '\n'.join(newlines)
 
     for input_name, _input in inputs.items():
-        template = template.maketrans(
+        template = template.translate(
             template.maketrans(
                 {
                     '${' + input_name + '}': _input,
