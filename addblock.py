@@ -463,7 +463,8 @@ def add_templated_java(package, name, suffix, force, conditionals, template):
 
 
 def add_templated_json(path, package, name, force, conditionals, template):
-    path = os.path.join(path, os.path.pathsep.join(package.split(".")))
+    for p in package.split('.'):
+        path = os.path.join(path, p)
     os.makedirs(path, exist_ok=True)
     json_name = name.lower() + '.json'
     path = os.path.join(path, json_name)
