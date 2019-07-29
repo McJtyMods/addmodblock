@@ -405,84 +405,122 @@ TEMPLATE_RECIPE_JSON = '''
   }
 }'''
 
+
 #################################################################################
 
 def generate(template, inputs, conditionals):
-    for cond in conditionals:
-        val = conditionals[cond]
+    for cond_name, conditional in conditionals.items():
         lines = template.splitlines()
         gen = True
         newlines = []
         for line in lines:
-            if line.strip() == '?{' + cond:
-                gen = val
-            elif line.strip() == '?}' + cond:
+            if line.strip() == '?{' + cond_name:
+                gen = conditional
+            elif line.strip() == '?}' + cond_name:
                 gen = True
             elif gen:
                 newlines.append(line)
+
         template = '\n'.join(newlines)
 
-    for inp in inputs:
-        val = inputs[inp]
-        template = template.replace('${'+inp+'}', val)
-        template = template.replace('$U{' + inp + '}', val.upper())
-        template = template.replace('$L{' + inp + '}', val.lower())
+    for input_name, _input in inputs.items():
+        template = template.translate(
+            template.maketrans(
+                {
+                    '${' + input_name + '}': _input,
+                    '$U{' + input_name + '}': _input.upper(),
+                    '$L{' + input_name + '}': _input.lower()
+                }
+            )
+        )
+
     return template.strip()
 
-def addtemplatedjava(package, name, suffix, force, conditionals, template):
+
+def add_templated_java(package, name, suffix, force, conditionals, template):
     path = SOURCE_ROOT
     for p in package.split('.'):
         path = os.path.join(path, p)
+
     os.makedirs(path, exist_ok=True)
-    javaname = name + suffix + '.java'
-    path = os.path.join(path, javaname)
+    java_name = f'{name}{suffix}.java'
+    path = os.path.join(path, java_name)
+
     if (not force) and os.path.exists(path):
-        print('File "' + javaname + '" already exists. Not generated')
+        print(f'File {java_name!r} already exists. Not generated')
     else:
-        print('Generated "' + javaname)
+        print(f'Generated {java_name!r}')
         f = open(path, 'w')
-        f.write(generate(template, { 'package' : ROOT_PACKAGE + '.' + package, 'modid_ref' : MODID_REF, 'modid': MODID, 'name' : name }, conditionals))
+
+        f.write(
+            generate(
+                template,
+                {
+                    'package': f'{ROOT_PACKAGE}.{package}',
+                    'modid_ref': MODID_REF,
+                    'modid': MODID,
+                    'name': name
+                },
+                conditionals
+            )
+        )
+
         f.close()
 
-def addtemplatedjson(path, package, name, force, conditionals, template):
-    for p in package.split('.'):
-        path = os.path.join(path, p)
+
+def add_templated_json(path, package, name, force, conditionals, template):
+    path = os.path.join(path, os.path.pathsep.join(package.split(".")))
     os.makedirs(path, exist_ok=True)
-    jsonname = name.lower() + '.json'
-    path = os.path.join(path, jsonname)
+    json_name = name.lower() + '.json'
+    path = os.path.join(path, json_name)
+
     if (not force) and os.path.exists(path):
-        print('File "' + jsonname + '" already exists. Not generated')
+        print(f'File {json_name!r} already exists. Not generated')
     else:
-        print('Generated "' + jsonname)
+        print(f'Generated {json_name!r}')
         f = open(path, 'w')
-        f.write(generate(template, { 'package' : ROOT_PACKAGE + '.' + package, 'modid_ref' : MODID_REF, 'modid': MODID, 'name' : name }, conditionals))
+
+        f.write(
+            generate(
+                template,
+                {
+                    'package': f"{ROOT_PACKAGE}.{package}",
+                    'modid_ref': MODID_REF,
+                    'modid': MODID,
+                    'name': name
+                },
+                conditionals
+            )
+        )
+
         f.close()
 
 
-def addblock(name, force, gui, tile, nojson):
-    conditionals = { 'gui': gui, 'tile': gui or tile }
-    addtemplatedjava(PACKAGE_BLOCKS, name, 'Block', force, conditionals, TEMPLATE_BLOCK)
+def add_block(name, force, gui, tile, no_json):
+    conditionals = {'gui': gui, 'tile': gui or tile}
+    add_templated_java(PACKAGE_BLOCKS, name, 'Block', force, conditionals, TEMPLATE_BLOCK)
     if gui or tile:
-        addtemplatedjava(PACKAGE_TILES, name, 'Tile', force, conditionals, TEMPLATE_TILE)
+        add_templated_java(PACKAGE_TILES, name, 'Tile', force, conditionals, TEMPLATE_TILE)
     if gui:
-        addtemplatedjava(PACKAGE_CONTAINERS, name, 'Container', force, conditionals, TEMPLATE_CONTAINER)
-        addtemplatedjava(PACKAGE_SCREENS, name, 'Screen', force, conditionals, TEMPLATE_SCREEN)
-    if not nojson:
-        addtemplatedjson(ASSET_RESOURCE_ROOT, 'blockstates', name, force, conditionals, TEMPLATE_BLOCKSTATE_JSON)
-        addtemplatedjson(ASSET_RESOURCE_ROOT, 'models.block', name, force, conditionals, TEMPLATE_BLOCKMODEL_JSON)
-        addtemplatedjson(ASSET_RESOURCE_ROOT, 'models.item', name, force, conditionals, TEMPLATE_ITEMMODEL_JSON)
-        addtemplatedjson(DATA_RESOURCE_ROOT, 'loot_tables.blocks', name, force, conditionals, TEMPLATE_LOOTTABLE_JSON)
-        addtemplatedjson(DATA_RESOURCE_ROOT, 'recipes', name, force, conditionals, TEMPLATE_RECIPE_JSON)
+        add_templated_java(PACKAGE_CONTAINERS, name, 'Container', force, conditionals, TEMPLATE_CONTAINER)
+        add_templated_java(PACKAGE_SCREENS, name, 'Screen', force, conditionals, TEMPLATE_SCREEN)
+    if not no_json:
+        add_templated_json(ASSET_RESOURCE_ROOT, 'blockstates', name, force, conditionals, TEMPLATE_BLOCKSTATE_JSON)
+        add_templated_json(ASSET_RESOURCE_ROOT, 'models.block', name, force, conditionals, TEMPLATE_BLOCKMODEL_JSON)
+        add_templated_json(ASSET_RESOURCE_ROOT, 'models.item', name, force, conditionals, TEMPLATE_ITEMMODEL_JSON)
+        add_templated_json(DATA_RESOURCE_ROOT, 'loot_tables.blocks', name, force, conditionals, TEMPLATE_LOOTTABLE_JSON)
+        add_templated_json(DATA_RESOURCE_ROOT, 'recipes', name, force, conditionals, TEMPLATE_RECIPE_JSON)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Make a block')
-    parser.add_argument('name', help='Camelcase name of the block to add')
+    parser.add_argument('name', help='CamelCase name of the block to add')
     parser.add_argument('--force', help='Overwrite files even if they exist (be careful!)', action='store_true')
     parser.add_argument('--tile', help='Generate additional code for a tileentity', action='store_true')
-    parser.add_argument('--gui', help='Generate additional code for container and gui (implies tile!)', action='store_true')
+    parser.add_argument('--gui', help='Generate additional code for container and gui (implies tile!)',
+                        action='store_true')
     parser.add_argument('--nojson', help='Prevent generating json', action='store_true')
     args = parser.parse_args()
 
-    print('Adding block ' + args.name)
-    addblock(args.name, args.force, args.gui, args.tile, args.nojson)
+    print(f'Adding block {args.name}')
+    add_block(args.name, args.force, args.gui, args.tile, args.nojson)
