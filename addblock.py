@@ -451,6 +451,7 @@ def add_templated_java(package, name, suffix, force, conditionals, template):
     else:
         print(f'Generated {java_name!r}')
         f = open(path, 'w')
+
         f.write(
             generate(
                 template,
@@ -478,6 +479,7 @@ def add_templated_json(path, package, name, force, conditionals, template):
     else:
         print(f'Generated {json_name!r}')
         f = open(path, 'w')
+
         f.write(
             generate(
                 template,
@@ -494,7 +496,7 @@ def add_templated_json(path, package, name, force, conditionals, template):
         f.close()
 
 
-def add_block(name, force, gui, tile, nojson):
+def add_block(name, force, gui, tile, no_json):
     conditionals = {'gui': gui, 'tile': gui or tile}
     add_templated_java(PACKAGE_BLOCKS, name, 'Block', force, conditionals, TEMPLATE_BLOCK)
     if gui or tile:
@@ -502,7 +504,7 @@ def add_block(name, force, gui, tile, nojson):
     if gui:
         add_templated_java(PACKAGE_CONTAINERS, name, 'Container', force, conditionals, TEMPLATE_CONTAINER)
         add_templated_java(PACKAGE_SCREENS, name, 'Screen', force, conditionals, TEMPLATE_SCREEN)
-    if not nojson:
+    if not no_json:
         add_templated_json(ASSET_RESOURCE_ROOT, 'blockstates', name, force, conditionals, TEMPLATE_BLOCKSTATE_JSON)
         add_templated_json(ASSET_RESOURCE_ROOT, 'models.block', name, force, conditionals, TEMPLATE_BLOCKMODEL_JSON)
         add_templated_json(ASSET_RESOURCE_ROOT, 'models.item', name, force, conditionals, TEMPLATE_ITEMMODEL_JSON)
