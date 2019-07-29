@@ -436,14 +436,15 @@ def add_templated_java(package, name, suffix, force, conditionals, template):
     for p in package.split('.'):
         path = os.path.join(path, p)
     os.makedirs(path, exist_ok=True)
-    javaname = name + suffix + '.java'
+    javaname = f'{name}{suffix}.java'
     path = os.path.join(path, javaname)
+
     if (not force) and os.path.exists(path):
-        print('File "' + javaname + '" already exists. Not generated')
+        print(f'File {javaname!r} already exists. Not generated')
     else:
-        print('Generated "' + javaname)
+        print(f'Generated {javaname!r}' + javaname)
         f = open(path, 'w')
-        f.write(generate(template, {'package': ROOT_PACKAGE + '.' + package, 'modid_ref': MODID_REF, 'modid': MODID,
+        f.write(generate(template, {'package': f'{ROOT_PACKAGE}.{package}', 'modid_ref': MODID_REF, 'modid': MODID,
                                     'name': name}, conditionals))
         f.close()
 
@@ -455,9 +456,9 @@ def add_templated_json(path, package, name, force, conditionals, template):
     jsonname = name.lower() + '.json'
     path = os.path.join(path, jsonname)
     if (not force) and os.path.exists(path):
-        print('File "' + jsonname + '" already exists. Not generated')
+        print(f'File {jsonname!r} already exists. Not generated')
     else:
-        print('Generated "' + jsonname)
+        print(f'Generated {jsonname!r}')
         f = open(path, 'w')
         f.write(generate(template, {'package': ROOT_PACKAGE + '.' + package, 'modid_ref': MODID_REF, 'modid': MODID,
                                     'name': name}, conditionals))
