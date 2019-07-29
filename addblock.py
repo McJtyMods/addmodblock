@@ -423,16 +423,16 @@ def generate(template, inputs, conditionals):
 
         template = '\n'.join(newlines)
 
-    for inp in inputs:
-        _input = inputs[inp]
-        tbl = template.maketrans(
-            {
-                '${' + inp + '}': _input,
-                '$U{' + inp + '}': _input.upper(),
-                '$L{' + inp + '}': _input.lower()
-            }
+    for input_name, _input in inputs.items():
+        template = template.maketrans(
+            template.maketrans(
+                {
+                    '${' + input_name + '}': _input,
+                    '$U{' + input_name + '}': _input.upper(),
+                    '$L{' + input_name + '}': _input.lower()
+                }
+            )
         )
-        template = template.maketrans(tbl)
 
     return template.strip()
 
