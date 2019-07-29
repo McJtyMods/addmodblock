@@ -409,25 +409,31 @@ TEMPLATE_RECIPE_JSON = '''
 #################################################################################
 
 def generate(template, inputs, conditionals):
-    for cond in conditionals:
-        val = conditionals[cond]
+    for cond_name, conditional in conditionals.items():
         lines = template.splitlines()
         gen = True
         newlines = []
         for line in lines:
-            if line.strip() == '?{' + cond:
-                gen = val
-            elif line.strip() == '?}' + cond:
+            if line.strip() == '?{' + cond_name:
+                gen = conditional
+            elif line.strip() == '?}' + cond_name:
                 gen = True
             elif gen:
                 newlines.append(line)
+
         template = '\n'.join(newlines)
 
     for inp in inputs:
-        val = inputs[inp]
-        template = template.replace('${' + inp + '}', val)
-        template = template.replace('$U{' + inp + '}', val.upper())
-        template = template.replace('$L{' + inp + '}', val.lower())
+        _input = inputs[inp]
+        tbl = template.maketrans(
+            {
+                '${' + inp + '}': _input,
+                '$U{' + inp + '}': _input.upper(),
+                '$L{' + inp + '}': _input.lower()
+            }
+        )
+        template = template.maketrans(tbl)
+
     return template.strip()
 
 
@@ -435,33 +441,56 @@ def add_templated_java(package, name, suffix, force, conditionals, template):
     path = SOURCE_ROOT
     for p in package.split('.'):
         path = os.path.join(path, p)
+
     os.makedirs(path, exist_ok=True)
-    javaname = f'{name}{suffix}.java'
-    path = os.path.join(path, javaname)
+    java_name = f'{name}{suffix}.java'
+    path = os.path.join(path, java_name)
 
     if (not force) and os.path.exists(path):
-        print(f'File {javaname!r} already exists. Not generated')
+        print(f'File {java_name!r} already exists. Not generated')
     else:
-        print(f'Generated {javaname!r}' + javaname)
+        print(f'Generated {java_name!r}')
         f = open(path, 'w')
-        f.write(generate(template, {'package': f'{ROOT_PACKAGE}.{package}', 'modid_ref': MODID_REF, 'modid': MODID,
-                                    'name': name}, conditionals))
+        f.write(
+            generate(
+                template,
+                {
+                    'package': f'{ROOT_PACKAGE}.{package}',
+                    'modid_ref': MODID_REF,
+                    'modid': MODID,
+                    'name': name
+                },
+                conditionals
+            )
+        )
+
         f.close()
 
 
 def add_templated_json(path, package, name, force, conditionals, template):
-    for p in package.split('.'):
-        path = os.path.join(path, p)
+    path = os.path.join(path, os.path.pathsep.join(package.split(".")))
     os.makedirs(path, exist_ok=True)
-    jsonname = name.lower() + '.json'
-    path = os.path.join(path, jsonname)
+    json_name = name.lower() + '.json'
+    path = os.path.join(path, json_name)
+
     if (not force) and os.path.exists(path):
-        print(f'File {jsonname!r} already exists. Not generated')
+        print(f'File {json_name!r} already exists. Not generated')
     else:
-        print(f'Generated {jsonname!r}')
+        print(f'Generated {json_name!r}')
         f = open(path, 'w')
-        f.write(generate(template, {'package': ROOT_PACKAGE + '.' + package, 'modid_ref': MODID_REF, 'modid': MODID,
-                                    'name': name}, conditionals))
+        f.write(
+            generate(
+                template,
+                {
+                    'package': f"{ROOT_PACKAGE}.{package}",
+                    'modid_ref': MODID_REF,
+                    'modid': MODID,
+                    'name': name
+                },
+                conditionals
+            )
+        )
+
         f.close()
 
 
@@ -491,5 +520,5 @@ if __name__ == '__main__':
     parser.add_argument('--nojson', help='Prevent generating json', action='store_true')
     args = parser.parse_args()
 
-    print('Adding block ' + args.name)
+    print(f'Adding block {args.name}')
     add_block(args.name, args.force, args.gui, args.tile, args.nojson)
