@@ -1,4 +1,4 @@
-# addmodblock
+# addmodblock for Minecraft 1.14 (with Forge)
 This simple python script helps with adding source code and json for minecraft blocks. Note! By default this script should never overwrite a file but if it does so I'm not responsible (although I will be sorry). Make backups!
 
 Before using this script you will have to configure it. Edit the script and modify the first part of the script to suit your needs.
