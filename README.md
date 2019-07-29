@@ -5,17 +5,17 @@ Before using this script you will have to configure it. Edit the script and modi
 
 To use this run this script from within your mod root folder. If you then want to add a block without tile entity and gui you can do this:
 
-python addblock.py MyFancyBlock
+# python addblock.py MyFancyBlock
 
 This will add the block class and all the needed jsons.
 
 If you want a tile entity you can do:
 
-python addblock.py MyFanceBlock --tile
+# python addblock.py MyFanceBlock --tile
 
 If you want a gui as well (and a container) you can do:
 
-python addblock.py MyFancyBlock --gui
+# python addblock.py MyFancyBlock --gui
 
 Note that in this case a tile entity will also be generated.
 
