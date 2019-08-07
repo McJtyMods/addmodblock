@@ -361,7 +361,7 @@ TEMPLATE_BLOCKMODEL_JSON = '''
 
 TEMPLATE_ITEMMODEL_JSON = '''
 {
-  "parent": "${modid}::block/$L{name}"
+  "parent": "${modid}:block/$L{name}"
 }
 '''
 
